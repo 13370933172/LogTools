@@ -8,6 +8,7 @@ iOS 实时日志记录器（追加模式）
 import sys
 import argparse
 import asyncio
+import os
 import posixpath
 from datetime import datetime
 
@@ -117,7 +118,7 @@ async def main():
         description='实时记录 iOS 设备系统日志到文件并显示（追加模式）',
         epilog='示例: python ios_log.py -o ios.log --filter "MyApp"'
     )
-    parser.add_argument('-o', '--output-file', required=True, help='输出日志文件路径')
+    parser.add_argument('-o', '--output-file', default=None, help='输出日志文件路径（默认自动生成: iOS_年月日时分秒.log）')
     parser.add_argument('--filter', default=None, help='只显示包含该字符串的行（不区分大小写）')
     parser.add_argument('--udid', default=None, help='指定设备的 UDID（多设备时需要）')
     args, unknown = parser.parse_known_args()
@@ -142,8 +143,11 @@ async def main():
 
     print(f"[INFO] 开始捕获 iOS 设备 {target_udid} 的实时日志...", file=sys.stderr)
 
+    output_file = args.output_file or f"iOS_{datetime.now().strftime('%Y%m%d')}/iOS_{datetime.now().strftime('%Y%m%d%H%M%S')}.log"
+    os.makedirs(os.path.dirname(output_file) or '.', exist_ok=True)
+
     task = asyncio.create_task(
-        capture_logs(target_udid, args.output_file, args.filter)
+        capture_logs(target_udid, output_file, args.filter)
     )
 
     try:

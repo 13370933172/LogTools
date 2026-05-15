@@ -8,6 +8,7 @@ HarmonyOS hilog 实时记录器（追加模式）
 import subprocess
 import sys
 import argparse
+import os
 import signal
 from datetime import datetime
 
@@ -25,7 +26,7 @@ def check_devices():
 
 def main():
     parser = argparse.ArgumentParser(description='实时记录 HarmonyOS hilog 日志到文件并显示（追加模式）')
-    parser.add_argument('-o', '--output-file', required=True, help='输出日志文件路径')
+    parser.add_argument('-o', '--output-file', default=None, help='输出日志文件路径（默认自动生成: HarmonyOS_年月日时分秒.log）')
     parser.add_argument('--filter', default=None, help='只显示包含该字符串的行（不区分大小写）')
     parser.add_argument('--domain', default=None, help='按 domain 过滤（如 0x0001）')
     parser.add_argument('--tag', default=None, help='按 tag 过滤')
@@ -48,12 +49,15 @@ def main():
 
     print(f"[INFO] 执行命令: {' '.join(cmd)}", file=sys.stderr)
 
+    output_file = args.output_file or f"HarmonyOS_{datetime.now().strftime('%Y%m%d')}/HarmonyOS_{datetime.now().strftime('%Y%m%d%H%M%S')}.log"
+    os.makedirs(os.path.dirname(output_file) or '.', exist_ok=True)
+
     out_file = None
     process = None
     line_count = 0
 
     try:
-        out_file = open(args.output_file, 'a', encoding='utf-8')
+        out_file = open(output_file, 'a', encoding='utf-8')
 
         separator = f"\n{'=' * 60}\n# HarmonyOS Log session started at {datetime.now()}\n{'=' * 60}\n"
         out_file.write(separator)

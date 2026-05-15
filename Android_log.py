@@ -7,6 +7,7 @@ Android Logcat 实时记录器（追加模式）
 import subprocess
 import sys
 import argparse
+import os
 import signal
 from datetime import datetime
 
@@ -23,7 +24,7 @@ def check_devices():
 
 def main():
     parser = argparse.ArgumentParser(description='实时记录 Android logcat 日志到文件并显示（追加模式）')
-    parser.add_argument('-o', '--output-file', required=True, help='输出日志文件路径')
+    parser.add_argument('-o', '--output-file', default=None, help='输出日志文件路径（默认自动生成: Android_年月日时分秒.log）')
     parser.add_argument('--filter', default=None, help='只显示包含该字符串的行（不区分大小写）')
     args, unknown = parser.parse_known_args()
 
@@ -33,13 +34,15 @@ def main():
     cmd = ['adb', 'logcat'] + unknown
     print(f"[INFO] 执行命令: {' '.join(cmd)}", file=sys.stderr)
 
+    output_file = args.output_file or f"Android_{datetime.now().strftime('%Y%m%d')}/Android_{datetime.now().strftime('%Y%m%d%H%M%S')}.log"
+    os.makedirs(os.path.dirname(output_file) or '.', exist_ok=True)
+
     out_file = None
     process = None
     line_count = 0
 
     try:
-        # 修改点：使用 'a' 模式追加，而不是 'w' 覆盖
-        out_file = open(args.output_file, 'a', encoding='utf-8')
+        out_file = open(output_file, 'a', encoding='utf-8')
 
         # 可选：在文件开头写入一条分隔线和启动时间，便于区分多次运行
         separator = f"\n{'=' * 60}\n# Log session started at {datetime.now()}\n{'=' * 60}\n"
