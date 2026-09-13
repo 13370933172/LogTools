@@ -16,7 +16,9 @@ from datetime import datetime
 def check_devices():
     result = subprocess.run(['hdc', 'list', 'targets'], capture_output=True, text=True)
     lines = result.stdout.strip().split('\n')
-    devices = [line for line in lines if line.strip()]
+    # 过滤空行和 [Empty]（无设备时 hdc 输出 "[Empty]"）
+    devices = [line.strip() for line in lines
+               if line.strip() and line.strip() != '[Empty]']
     if not devices:
         print("[ERROR] 没有检测到已连接的 HarmonyOS 设备，请运行 'hdc list targets' 检查。", file=sys.stderr)
         return False
@@ -49,7 +51,11 @@ def main():
 
     print(f"[INFO] 执行命令: {' '.join(cmd)}", file=sys.stderr)
 
-    output_file = args.output_file or f"HarmonyOS_{datetime.now().strftime('%Y%m%d')}/HarmonyOS_{datetime.now().strftime('%Y%m%d%H%M%S')}.log"
+    now = datetime.now()
+    output_file = args.output_file or (
+        f"HarmonyOS_{now.strftime('%Y')}/HarmonyOS_{now.strftime('%Y%m')}/HarmonyOS_{now.strftime('%Y%m%d')}/"
+        f"HarmonyOS_{now.strftime('%Y%m%d%H%M%S')}.log"
+    )
     os.makedirs(os.path.dirname(output_file) or '.', exist_ok=True)
 
     out_file = None

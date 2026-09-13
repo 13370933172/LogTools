@@ -143,7 +143,11 @@ async def main():
 
     print(f"[INFO] 开始捕获 iOS 设备 {target_udid} 的实时日志...", file=sys.stderr)
 
-    output_file = args.output_file or f"iOS_{datetime.now().strftime('%Y%m%d')}/iOS_{datetime.now().strftime('%Y%m%d%H%M%S')}.log"
+    now = datetime.now()
+    output_file = args.output_file or (
+        f"iOS_{now.strftime('%Y')}/iOS_{now.strftime('%Y%m')}/iOS_{now.strftime('%Y%m%d')}/"
+        f"iOS_{now.strftime('%Y%m%d%H%M%S')}.log"
+    )
     os.makedirs(os.path.dirname(output_file) or '.', exist_ok=True)
 
     task = asyncio.create_task(

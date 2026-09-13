@@ -107,7 +107,7 @@ harmony_log.exe --filter "调用" --domain 0x0001 --level I
 
 | 参数 | 说明 |
 |---|---|
-| `-o, --output-file` | 输出日志文件路径。可选，默认自动生成 `{平台}_{年月日}/{平台}_{年月日时分秒}.log` |
+| `-o, --output-file` | 输出日志文件路径。可选，默认自动生成 `{平台}_{年}/{平台}_{年月}/{平台}_{年月日}/{平台}_{年月日时分秒}.log` |
 | `--filter` | 文本过滤，只保留包含该字符串的行（不区分大小写） |
 
 ### iOS 专属参数
@@ -126,17 +126,23 @@ harmony_log.exe --filter "调用" --domain 0x0001 --level I
 
 ## 日志文件组织
 
-不指定 `-o` 时，日志自动按天归档：
+不指定 `-o` 时，日志自动按 年/月/日 三级目录归档：
 
 ```
 iOSLog/
-├── Android_20260515/
-│   ├── Android_20260515102030.log
-│   └── Android_20260515143015.log
-├── iOS_20260515/
-│   └── iOS_20260515151713.log
-└── HarmonyOS_20260515/
-    └── HarmonyOS_20260515152245.log
+├── iOS_2026/
+│   └── iOS_202609/
+│       └── iOS_20260910/
+│           └── iOS_20260910151010.log
+├── Android_2026/
+│   └── Android_202609/
+│       └── Android_20260910/
+│           ├── Android_20260910102030.log
+│           └── Android_20260910143015.log
+└── HarmonyOS_2026/
+    └── HarmonyOS_202609/
+        └── HarmonyOS_20260910/
+            └── HarmonyOS_20260910152245.log
 ```
 
 每次启动会在文件末尾追加，不会覆盖已有内容。每次会话以分隔线和时间戳标记起止。
@@ -152,9 +158,11 @@ iOSLog/
 ```bash
 pip install pyinstaller
 pyinstaller --onefile --console --name Android_log Android_log.py
-pyinstaller --onefile --console --name ios_log ios_log.py
+pyinstaller --onefile --console --collect-all pymobiledevice3 --name ios_log ios_log.py
 pyinstaller --onefile --console --name harmony_log harmony_log.py
 ```
+
+> 注意：iOS 打包必须带 `--collect-all pymobiledevice3`，否则运行时会报"未安装 pymobiledevice3"。
 
 输出文件在 `dist/` 目录。
 

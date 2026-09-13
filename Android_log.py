@@ -34,7 +34,11 @@ def main():
     cmd = ['adb', 'logcat'] + unknown
     print(f"[INFO] 执行命令: {' '.join(cmd)}", file=sys.stderr)
 
-    output_file = args.output_file or f"Android_{datetime.now().strftime('%Y%m%d')}/Android_{datetime.now().strftime('%Y%m%d%H%M%S')}.log"
+    now = datetime.now()
+    output_file = args.output_file or (
+        f"Android_{now.strftime('%Y')}/Android_{now.strftime('%Y%m')}/Android_{now.strftime('%Y%m%d')}/"
+        f"Android_{now.strftime('%Y%m%d%H%M%S')}.log"
+    )
     os.makedirs(os.path.dirname(output_file) or '.', exist_ok=True)
 
     out_file = None
